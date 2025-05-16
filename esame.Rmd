@@ -43,28 +43,27 @@ pioggia$'1_AVG_D'
 
 Suggerimenti: sum(pioggia$'5_AVG_D' .........)
 
+Alternativa: usa filter e summarise
+pioggia |>
+  filter(.......) |> 
+  summarise(n_days = n())
+
+
 ## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione ‘1_AVG_D’ per  mese.
 
-Suggerimento-> usa la sintassi per creare una nuova variabile mese (month): 
-
-“mutate(month = floor_date(Date, "month")) %>%”
-
+Suggerimento-> usa la sintassi per creare nuove variabili mese (month) e anno (year): 
+  mutate(year = year(Date), month = month(Date)) %>%
 successivamente usa group_by
 
 Scheletro: 
 
 pioggia_monthly <- pioggia %>%
-
-  select(.........) %>%
-  
-  mutate(month = floor_date(Date, "month")) %>%
-  
-  group_by(month) %>%
-  
+  mutate(year = year(Date), month = month(Date)) %>%
+  group_by(year ,month) %>%
   summarise(.............)
 
 
-## Esercizio 7: Qual è il giorno con più pioggia totale?
+## Esercizio 7: Qual è il mese più piovoso?
 	Suggerimento-> Scheletro:
 	
 	pioggia_monthly %>%
@@ -84,9 +83,9 @@ Scheletro:
 
 	pioggia %>%
 	
-  	filter(month(Date) == 1, year(Date) == 2001) 
+  	filter(month(Date) == 1, year(Date) == 2001) %>%
 
-  ggplot(data = pioggia, aes(   )) +
+  ggplot( aes(.......)) +
   
   geom_line() #oppure geom_bar()
 

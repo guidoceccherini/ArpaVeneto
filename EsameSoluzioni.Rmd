@@ -57,42 +57,53 @@ mean(pioggia$`1_AVG_D`, na.rm = TRUE)
 ##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione 5_AVG_D?
 
 Suggerimenti: sum(pioggia$'5_AVG_D' .........)
+
+Alternativa: usa filter e summarise
+
+pioggia |>
+  filter(.......) |> 
+  summarise(n_days = n())
 ```{r}
 sum(pioggia$`5_AVG_D` > 10, na.rm = TRUE)
+
+# alternativa
+pioggia |>
+  filter(`5_AVG_D` > 10) |> 
+  summarise(n_days = n())
+
+
 ```
 
 
 ## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione ‘1_AVG_D’ per  mese.
 
-Suggerimento-> usa la sintassi per creare una nuova variabile mese (month): 
-“mutate(month = floor_date(Date, "month")) %>%”
+Suggerimento-> usa la sintassi per creare nuove variabili mese (month) e anno (year): 
+  mutate(year = year(Date), month = month(Date)) %>%
 successivamente usa group_by
 
 Scheletro: 
 
 pioggia_monthly <- pioggia %>%
-  select(.........) %>%
-  mutate(month = floor_date(Date, "month")) %>%
-  group_by(month) %>%
+  mutate(year = year(Date), month = month(Date)) %>%
+  group_by(year ,month) %>%
   summarise(.............)
 
 
 ```{r}
 
 pioggia_monthly <- pioggia %>%
-  select(c(Date,`1_AVG_D`)) %>%
-  mutate(month = floor_date(Date, "month")) %>%
-  group_by(month) %>%
-  summarise(
-    sum_monthly = sum(`1_AVG_D`, na.rm = TRUE),  # or sum(...) if you prefer
-  )
+  mutate(year = year(Date), month = month(Date)) %>%
+  group_by(year , month ) %>%
+  summarise(sum_monthly = sum(`1_AVG_D`, na.rm = TRUE)) |> 
+  ungroup()
+
 
 pioggia_monthly
 
 
 ```
 
-## Esercizio 7: Qual è il giorno con più pioggia totale?
+## Esercizio 7: Qual è il mese più piovoso?
 	Suggerimento-> Scheletro:
 	pioggia_monthly %>%
   	filter(max_monthly ==....) %>%
@@ -114,9 +125,8 @@ pioggia_monthly %>%
 	filter(month(Date) == 1, year(Date) == 2001) %>%
 Scheletro:
 	pioggia %>%
-  	filter(month(Date) == 1, year(Date) == 2001) 
-
-  ggplot(data = pioggia, aes(   )) +
+	filter(month(Date) == 1, year(Date) == 2001) %>%
+  ggplot( aes(.........   )) +
   geom_line() #oppure geom_bar()
 
 
@@ -138,6 +148,12 @@ pioggia %>%
 pioggia_long <- pioggia %>%
   pivot_longer(cols = -Date, names_to = "Stazione", values_to = "Pioggia")
 
+
+
+
+
+
+
 pioggia_long %>%
   group_by(Stazione) %>%
   summarise(media = mean(Pioggia, na.rm = TRUE))
@@ -147,11 +163,11 @@ pioggia_long %>%
 
 ```{r}
 pioggia_2002 <- pioggia %>%
+  mutate(year = year(Date), month = month(Date)) %>%
   filter(year(Date) == 2002) %>%
-  select(c(Date,`1_AVG_D`)) %>%
-  mutate(month = floor_date(Date, "month")) %>%
-  group_by(month) %>%
-  summarise(sum_monthly = sum(`1_AVG_D`, na.rm = TRUE))
+  group_by(year , month ) %>%
+  summarise(sum_monthly = sum(`1_AVG_D`, na.rm = TRUE)) |> 
+  ungroup()
 
 pioggia_2002 %>%
   filter(sum_monthly == max(sum_monthly))
