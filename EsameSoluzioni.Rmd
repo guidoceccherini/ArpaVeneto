@@ -1,0 +1,235 @@
+---
+title: "Esame scritto - Corso base R con soluzioni"
+author: "Guido Ceccherini"
+date: "2025-05-05"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+```
+
+# Istruzioni
+
+1. Leggi attentamente le consegne per ogni blocco.
+2. Puoi usare qualsiasi funzione di base o del tidyverse.
+
+---
+
+# Tier 1 – Livello Base
+
+## Esercizio 1: Caricamento ed esplorazione
+Carica il file `aggregationComuniErg5_DAILY_PREC.csv` e salvalo in un oggetto chiamato `pioggia`.
+
+```{r}
+pioggia <- read_csv("Data/aggregationComuniErg5_DAILY_PREC.csv")
+
+```
+## Esercizio 2: Mostra le prime 5 righe del dataset pioggia.
+
+
+```{r}
+head(pioggia, 5)
+```
+
+## Esercizio 3: Qual è la dimensione del dataset pioggia? (righe e colonne?)
+
+
+```{r}
+dim(pioggia)
+```
+
+
+##  Esercizio 4: Calcola la pioggia media per la stazione 1_AVG_D nel periodo coperto.
+Suggerimenti: per accedere alla colonna 1_AVG_D la sintassi e’ :
+pioggia$`1_AVG_D`
+
+
+```{r}
+mean(pioggia$`1_AVG_D`, na.rm = TRUE)
+```
+
+
+##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione 5_AVG_D?
+
+Suggerimenti: sum(pioggia$'5_AVG_D' .........)
+```{r}
+sum(pioggia$`5_AVG_D` > 10, na.rm = TRUE)
+```
+
+
+## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione ‘1_AVG_D’ per  mese.
+
+Suggerimento-> usa la sintassi per creare una nuova variabile mese (month): 
+“mutate(month = floor_date(Date, "month")) %>%”
+successivamente usa group_by
+
+Scheletro: 
+
+pioggia_monthly <- pioggia %>%
+  select(.........) %>%
+  mutate(month = floor_date(Date, "month")) %>%
+  group_by(month) %>%
+  summarise(.............)
+
+
+```{r}
+
+pioggia_monthly <- pioggia %>%
+  select(c(Date,`1_AVG_D`)) %>%
+  mutate(month = floor_date(Date, "month")) %>%
+  group_by(month) %>%
+  summarise(
+    sum_monthly = sum(`1_AVG_D`, na.rm = TRUE),  # or sum(...) if you prefer
+  )
+
+pioggia_monthly
+
+
+```
+
+## Esercizio 7: Qual è il giorno con più pioggia totale?
+	Suggerimento-> Scheletro:
+	pioggia_monthly %>%
+  	filter(max_monthly ==....) %>%
+ 	 select(.....)
+
+
+
+```{r}
+
+
+pioggia_monthly %>%
+  filter(sum_monthly == max(sum_monthly)) %>%
+  select(month, sum_monthly)
+```
+
+
+## Esercizio 8: Crea un grafico della pioggia giornaliera della stazione ‘1_AVG_D’nel primo mese del dataset.
+	Suggerimenti: per accedere al primo mese del dataset la sintassi e’ :
+	filter(month(Date) == 1, year(Date) == 2001) %>%
+Scheletro:
+	pioggia %>%
+  	filter(month(Date) == 1, year(Date) == 2001) 
+
+  ggplot(data = pioggia, aes(   )) +
+  geom_line() #oppure geom_bar()
+
+
+```{r}
+pioggia %>%
+  filter(month(Date) == 1, year(Date) == 2001) %>%
+  ggplot(aes(x = Date, y = `1_AVG_D`)) +
+  geom_line() +
+  labs(title = "Pioggia giornaliera - Stazione 1, Gennaio 2001")
+```
+
+---
+
+# Tier 2 – Livello Avanzato
+
+## Esercizio 1: Dati in formato long (BONUS)
+
+```{r}
+pioggia_long <- pioggia %>%
+  pivot_longer(cols = -Date, names_to = "Stazione", values_to = "Pioggia")
+
+pioggia_long %>%
+  group_by(Stazione) %>%
+  summarise(media = mean(Pioggia, na.rm = TRUE))
+```
+
+## Esercizio 2: Filtraggio e sintesi
+
+```{r}
+pioggia_2002 <- pioggia %>%
+  filter(year(Date) == 2002) %>%
+  select(c(Date,`1_AVG_D`)) %>%
+  mutate(month = floor_date(Date, "month")) %>%
+  group_by(month) %>%
+  summarise(sum_monthly = sum(`1_AVG_D`, na.rm = TRUE))
+
+pioggia_2002 %>%
+  filter(sum_monthly == max(sum_monthly))
+```
+
+
+
+## Esercizio 3: Grafico con ggplot2
+
+```{r}
+
+
+pioggia_mensile <- pioggia %>%
+  select(Date, `1_AVG_D`:`5_AVG_D`) %>%
+  filter(year(Date) == 2002) %>%
+  mutate(Mese = floor_date(Date, "month")) %>%
+  group_by(Mese) %>%
+  summarise(
+    Stazione_1 = sum(`1_AVG_D`, na.rm = TRUE),
+    Stazione_2 = sum(`2_AVG_D`, na.rm = TRUE),
+    Stazione_3 = sum(`3_AVG_D`, na.rm = TRUE),
+    Stazione_4 = sum(`4_AVG_D`, na.rm = TRUE),
+    Stazione_5 = sum(`5_AVG_D`, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Ricostruisce il grafico usando il formato largo
+ggplot(pioggia_mensile, aes(x = Mese)) +
+  geom_line(aes(y = Stazione_1, color = "Stazione 1")) +
+  geom_line(aes(y = Stazione_2, color = "Stazione 2")) +
+  geom_line(aes(y = Stazione_3, color = "Stazione 3")) +
+  geom_line(aes(y = Stazione_4, color = "Stazione 4")) +
+  geom_line(aes(y = Stazione_5, color = "Stazione 5")) +
+  labs(title = "Pioggia cumulata mensile - Prime 5 stazioni (2002)", y = "mm", color = "Stazione")
+
+
+# Alternativa con pivot_longer
+
+pioggia %>%
+  select(Date, `1_AVG_D`:`5_AVG_D`) %>%
+  filter(year(Date) == 2002) %>%
+  mutate(Mese = floor_date(Date, "month")) %>%
+  pivot_longer(cols = -c(Date, Mese), names_to = "Stazione", values_to = "Pioggia") %>%
+  group_by(Mese, Stazione) %>%
+  summarise(Pioggia_cumulata = sum(Pioggia, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(aes(x = Mese, y = Pioggia_cumulata, color = Stazione)) +
+  geom_line() +
+  labs(title = "Pioggia cumulata mensile - Prime 5 stazioni (2002)", y = "mm")
+  
+  
+
+
+
+```
+
+
+```{r}
+# Alternativa con pivot_longer e molti anni
+
+pioggia %>%
+  select(Date, `1_AVG_D`:`5_AVG_D`) %>%
+  filter(year(Date) %in% c(2002, 2003, 2004)) %>%
+  pivot_longer(cols = `1_AVG_D`:`5_AVG_D`, names_to = "Stazione", values_to = "Pioggia") %>%
+  mutate(Mese = floor_date(Date, "month")) %>%
+  group_by(Mese, Stazione) %>%
+  summarise(Pioggia_cumulata = sum(Pioggia, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(aes(x = Mese, y = Pioggia_cumulata, color = Stazione)) +
+  geom_line() +
+  labs(title = "Pioggia cumulata mensile - Prime 5 stazioni (2002-2004)", y = "mm")
+
+```
+
+
+---
+
+#  Note finali
+
+- Ricordati di salvare lo script.
+- L'uso di commenti nel codice è apprezzato.
+- Buon lavoro!
+

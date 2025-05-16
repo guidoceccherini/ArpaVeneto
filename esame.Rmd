@@ -1,0 +1,114 @@
+---
+title: "Esame scritto - Corso base R"
+author: "Guido Ceccherini"
+date: "2025-05-05"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+```
+
+# Istruzioni
+
+1. Leggi attentamente le consegne per ogni blocco.
+2. Puoi usare qualsiasi funzione di base o del tidyverse.
+
+---
+
+#  Tier 1 – Livello Base
+
+## Esercizio 1: Caricamento ed esplorazione
+Carica il file `aggregationComuniErg5_DAILY_PREC.csv` e salvalo in un dataset chiamato `pioggia`.
+
+## Esercizio 2: Mostra le prime 5 righe del dataset pioggia.
+Suggerimenti: vedi lezione “Strutture dati”
+
+
+## Esercizio 3: Qual è la dimensione del dataset pioggia? (righe e colonne?)
+Suggerimenti: vedi lezione “Esplorazione dei dataframe”
+
+
+
+##  Esercizio 4: Calcola la pioggia media per la stazione 1_AVG_D nel periodo coperto.
+Suggerimenti: per accedere alla colonna 1_AVG_D la sintassi e’ :
+pioggia$'1_AVG_D'
+
+
+##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione 5_AVG_D?
+
+Suggerimenti: sum(pioggia$'5_AVG_D' .........)
+
+## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione ‘1_AVG_D’ per  mese.
+
+Suggerimento-> usa la sintassi per creare una nuova variabile mese (month): 
+
+“mutate(month = floor_date(Date, "month")) %>%”
+
+successivamente usa group_by
+
+Scheletro: 
+
+pioggia_monthly <- pioggia %>%
+
+  select(.........) %>%
+  
+  mutate(month = floor_date(Date, "month")) %>%
+  
+  group_by(month) %>%
+  
+  summarise(.............)
+
+
+## Esercizio 7: Qual è il giorno con più pioggia totale?
+	Suggerimento-> Scheletro:
+	
+	pioggia_monthly %>%
+	
+  	filter(max_monthly ==....) %>%
+  	
+ 	 select(.....)
+
+
+
+
+## Esercizio 8: Crea un grafico della pioggia giornaliera della stazione ‘1_AVG_D’nel primo mese del dataset.
+	Suggerimenti: per accedere al primo mese del dataset la sintassi e’ :
+	
+	filter(month(Date) == 1, year(Date) == 2001) %>%
+Scheletro:
+
+	pioggia %>%
+	
+  	filter(month(Date) == 1, year(Date) == 2001) 
+
+  ggplot(data = pioggia, aes(   )) +
+  
+  geom_line() #oppure geom_bar()
+
+
+---
+
+# Tier 2 – Livello Avanzato
+
+
+## Esercizio 1: Dati in formato long (BONUS)
+
+## Esercizio 2: Filtraggio e sintesi
+Seleziona solo i giorni del 2002.
+Qual è il mese più piovoso?
+
+
+## Esercizio 3: Grafico con ggplot2
+	Crea un grafico a linee della pioggia media mensile nel 2002 per le prime 5 stazioni.
+---
+
+#  Note finali
+
+- Ricordati di salvare lo script.
+- L'uso di commenti nel codice è apprezzato.
+- Buon lavoro!
