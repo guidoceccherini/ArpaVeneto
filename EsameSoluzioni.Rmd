@@ -26,7 +26,7 @@ library(lubridate)
 Carica il file `aggregationComuniErg5_DAILY_PREC.csv` e salvalo in un oggetto chiamato `pioggia`.
 
 ```{r}
-pioggia <- read_csv("Data/aggregationComuniErg5_DAILY_PREC.csv")
+pioggia <- read.csv("Data/aggregationComuniErg5_DAILY_PREC.csv")
 
 ```
 ## Esercizio 2: Mostra le prime 5 righe del dataset pioggia.
@@ -45,65 +45,54 @@ dim(pioggia)
 
 
 ##  Esercizio 4: Calcola la pioggia media per la stazione 1_AVG_D nel periodo coperto.
-Suggerimenti: per accedere alla colonna 1_AVG_D la sintassi e’ :
-pioggia$`1_AVG_D`
+Suggerimenti: per accedere alla colonna X1_AVG_D la sintassi e’ :
+pioggia$X1_AVG_D
 
 
 ```{r}
-mean(pioggia$`1_AVG_D`, na.rm = TRUE)
+mean(pioggia$X1_AVG_D, na.rm = TRUE)
 ```
 
 
-##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione 5_AVG_D?
+##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione X5_AVG_D?
 
-Suggerimenti: sum(pioggia$'5_AVG_D' .........)
-
-Alternativa: usa filter e summarise
-
-pioggia |>
-  filter(.......) |> 
-  summarise(n_days = n())
+Suggerimenti: sum(pioggia$X5_AVG_D .........)
 ```{r}
-sum(pioggia$`5_AVG_D` > 10, na.rm = TRUE)
-
-# alternativa
-pioggia |>
-  filter(`5_AVG_D` > 10) |> 
-  summarise(n_days = n())
-
-
+sum(pioggia$X5_AVG_D > 10, na.rm = TRUE)
 ```
 
 
-## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione ‘1_AVG_D’ per  mese.
+## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione X1_AVG_D per  mese.
 
-Suggerimento-> usa la sintassi per creare nuove variabili mese (month) e anno (year): 
-  mutate(year = year(Date), month = month(Date)) %>%
-successivamente usa group_by
-
+Suggerimento-> usa la sintassi per creare due nuove variabile mese (month) e anno (year): 
+“mutate ( year = year(Date), month = month(Date)) ”
+successivamente, usa group_by
 Scheletro: 
-
 pioggia_monthly <- pioggia %>%
-  mutate(year = year(Date), month = month(Date)) %>%
-  group_by(year ,month) %>%
-  summarise(.............)
+mutate(year = year(Date), month = month(Date)) %>%
+group_by(year, month ) %>%
+summarise(sum_monthly = ………) |> 
+ungroup()
+
 
 
 ```{r}
 
 pioggia_monthly <- pioggia %>%
+  select(c(Date,X1_AVG_D)) %>%
   mutate(year = year(Date), month = month(Date)) %>%
-  group_by(year , month ) %>%
-  summarise(sum_monthly = sum(`1_AVG_D`, na.rm = TRUE)) |> 
+  group_by(year, month ) %>%
+  summarise(
+    sum_monthly = sum(X1_AVG_D, na.rm = TRUE),  # or sum(...) if you prefer
+  ) %>%
   ungroup()
-
 
 pioggia_monthly
 
 
 ```
 
-## Esercizio 7: Qual è il mese più piovoso?
+## Esercizio 7: Qual è il giorno con più pioggia totale?
 	Suggerimento-> Scheletro:
 	pioggia_monthly %>%
   	filter(max_monthly ==....) %>%
@@ -120,20 +109,24 @@ pioggia_monthly %>%
 ```
 
 
-## Esercizio 8: Crea un grafico della pioggia giornaliera della stazione ‘1_AVG_D’nel primo mese del dataset.
+## Esercizio 8: Crea un grafico della pioggia giornaliera della stazione X1_AVG_D nel primo mese del dataset.
 	Suggerimenti: per accedere al primo mese del dataset la sintassi e’ :
 	filter(month(Date) == 1, year(Date) == 2001) %>%
 Scheletro:
 	pioggia %>%
-	filter(month(Date) == 1, year(Date) == 2001) %>%
-  ggplot( aes(.........   )) +
+  	filter(month(Date) == 1, year(Date) == 2001) %>%
+  	mutate(Date = as.Date(Date)) 
+
+  ggplot(data = pioggia, aes(   )) +
   geom_line() #oppure geom_bar()
 
 
 ```{r}
 pioggia %>%
   filter(month(Date) == 1, year(Date) == 2001) %>%
-  ggplot(aes(x = Date, y = `1_AVG_D`)) +
+  mutate(Date = as.Date(Date)) %>%
+
+  ggplot(aes(x = Date, y = X1_AVG_D)) +
   geom_line() +
   labs(title = "Pioggia giornaliera - Stazione 1, Gennaio 2001")
 ```
@@ -148,12 +141,6 @@ pioggia %>%
 pioggia_long <- pioggia %>%
   pivot_longer(cols = -Date, names_to = "Stazione", values_to = "Pioggia")
 
-
-
-
-
-
-
 pioggia_long %>%
   group_by(Stazione) %>%
   summarise(media = mean(Pioggia, na.rm = TRUE))
@@ -163,11 +150,11 @@ pioggia_long %>%
 
 ```{r}
 pioggia_2002 <- pioggia %>%
-  mutate(year = year(Date), month = month(Date)) %>%
   filter(year(Date) == 2002) %>%
-  group_by(year , month ) %>%
-  summarise(sum_monthly = sum(`1_AVG_D`, na.rm = TRUE)) |> 
-  ungroup()
+  select(c(Date,X1_AVG_D)) %>%
+  mutate(month = floor_date(Date, "month")) %>%
+  group_by(month) %>%
+  summarise(sum_monthly = sum(X1_AVG_D, na.rm = TRUE))
 
 pioggia_2002 %>%
   filter(sum_monthly == max(sum_monthly))
@@ -181,16 +168,16 @@ pioggia_2002 %>%
 
 
 pioggia_mensile <- pioggia %>%
-  select(Date, `1_AVG_D`:`5_AVG_D`) %>%
+  select(Date, X1_AVG_D : X5_AVG_D) %>%
   filter(year(Date) == 2002) %>%
   mutate(Mese = floor_date(Date, "month")) %>%
   group_by(Mese) %>%
   summarise(
-    Stazione_1 = sum(`1_AVG_D`, na.rm = TRUE),
-    Stazione_2 = sum(`2_AVG_D`, na.rm = TRUE),
-    Stazione_3 = sum(`3_AVG_D`, na.rm = TRUE),
-    Stazione_4 = sum(`4_AVG_D`, na.rm = TRUE),
-    Stazione_5 = sum(`5_AVG_D`, na.rm = TRUE),
+    Stazione_1 = sum(X1_AVG_D, na.rm = TRUE),
+    Stazione_2 = sum(X2_AVG_D, na.rm = TRUE),
+    Stazione_3 = sum(X3_AVG_D, na.rm = TRUE),
+    Stazione_4 = sum(X4_AVG_D, na.rm = TRUE),
+    Stazione_5 = sum(X5_AVG_D, na.rm = TRUE),
     .groups = "drop"
   )
 
@@ -207,7 +194,7 @@ ggplot(pioggia_mensile, aes(x = Mese)) +
 # Alternativa con pivot_longer
 
 pioggia %>%
-  select(Date, `1_AVG_D`:`5_AVG_D`) %>%
+  select(Date, X1_AVG_D: X5_AVG_D ) %>%
   filter(year(Date) == 2002) %>%
   mutate(Mese = floor_date(Date, "month")) %>%
   pivot_longer(cols = -c(Date, Mese), names_to = "Stazione", values_to = "Pioggia") %>%
@@ -228,9 +215,9 @@ pioggia %>%
 # Alternativa con pivot_longer e molti anni
 
 pioggia %>%
-  select(Date, `1_AVG_D`:`5_AVG_D`) %>%
+  select(Date, X1_AVG_D:X5_AVG_D) %>%
   filter(year(Date) %in% c(2002, 2003, 2004)) %>%
-  pivot_longer(cols = `1_AVG_D`:`5_AVG_D`, names_to = "Stazione", values_to = "Pioggia") %>%
+  pivot_longer(cols = X1_AVG_D:X5_AVG_D, names_to = "Stazione", values_to = "Pioggia") %>%
   mutate(Mese = floor_date(Date, "month")) %>%
   group_by(Mese, Stazione) %>%
   summarise(Pioggia_cumulata = sum(Pioggia, na.rm = TRUE), .groups = "drop") %>%

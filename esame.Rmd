@@ -34,36 +34,37 @@ Suggerimenti: vedi lezione “Esplorazione dei dataframe”
 
 
 
-##  Esercizio 4: Calcola la pioggia media per la stazione 1_AVG_D nel periodo coperto.
-Suggerimenti: per accedere alla colonna 1_AVG_D la sintassi e’ :
-pioggia$'1_AVG_D'
+##  Esercizio 4: Calcola la pioggia media per la stazione X1_AVG_D nel periodo coperto.
+Suggerimenti: per accedere alla colonna X1_AVG_D la sintassi e’ :
+pioggia$X1_AVG_D
 
 
-##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione 5_AVG_D?
+##  Esercizio 5: Quanti giorni hanno registrato più di 10 mm nella stazione X5_AVG_D?
 
-Suggerimenti: sum(pioggia$'5_AVG_D' .........)
+Suggerimenti: sum(pioggia$X5_AVG_D .........)
 
-Alternativa: usa filter e summarise
-pioggia |>
-  filter(.......) |> 
-  summarise(n_days = n())
+## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione X1_AVG_D per  mese.
 
+Suggerimento-> usa la sintassi per creare una nuova variabile mese (month): 
 
-## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione ‘1_AVG_D’ per  mese.
+“mutate(month = floor_date(Date, "month")) %>%”
 
-Suggerimento-> usa la sintassi per creare nuove variabili mese (month) e anno (year): 
-  mutate(year = year(Date), month = month(Date)) %>%
 successivamente usa group_by
 
 Scheletro: 
 
 pioggia_monthly <- pioggia %>%
-  mutate(year = year(Date), month = month(Date)) %>%
-  group_by(year ,month) %>%
+
+  select(.........) %>%
+  
+  mutate(month = floor_date(Date, "month")) %>%
+  
+  group_by(month) %>%
+  
   summarise(.............)
 
 
-## Esercizio 7: Qual è il mese più piovoso?
+## Esercizio 7: Qual è il giorno con più pioggia totale?
 	Suggerimento-> Scheletro:
 	
 	pioggia_monthly %>%
@@ -75,17 +76,18 @@ pioggia_monthly <- pioggia %>%
 
 
 
-## Esercizio 8: Crea un grafico della pioggia giornaliera della stazione ‘1_AVG_D’nel primo mese del dataset.
+## Esercizio 8: Crea un grafico della pioggia giornaliera della stazione X1_AVG_Dnel primo mese del dataset.
 	Suggerimenti: per accedere al primo mese del dataset la sintassi e’ :
 	
 	filter(month(Date) == 1, year(Date) == 2001) %>%
+	  mutate(Date = as.Date(Date)) 
 Scheletro:
 
-	pioggia %>%
-	
-  	filter(month(Date) == 1, year(Date) == 2001) %>%
+pioggia %>%
+  filter(month(Date) == 1, year(Date) == 2001) %>%
+  mutate(Date = as.Date(Date)) 
 
-  ggplot( aes(.......)) +
+  ggplot(data = pioggia, aes(   )) +
   
   geom_line() #oppure geom_bar()
 
