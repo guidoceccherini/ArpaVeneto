@@ -83,11 +83,11 @@ pioggia_monthly <- pioggia %>%
 	  mutate(Date = as.Date(Date)) 
 Scheletro:
 
-pioggia %>%
+pioggia_filtrata <- pioggia %>%
   filter(month(Date) == 1, year(Date) == 2001) %>%
   mutate(Date = as.Date(Date)) 
 
-  ggplot(data = pioggia, aes(   )) +
+  ggplot(data = pioggia_filtrata, aes(   )) +
   
   geom_line() #oppure geom_bar()
 

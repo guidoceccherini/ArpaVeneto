@@ -113,15 +113,26 @@ pioggia_monthly %>%
 	Suggerimenti: per accedere al primo mese del dataset la sintassi e’ :
 	filter(month(Date) == 1, year(Date) == 2001) %>%
 Scheletro:
-	pioggia %>%
+	pioggia_filtrata <- pioggia %>%
   	filter(month(Date) == 1, year(Date) == 2001) %>%
   	mutate(Date = as.Date(Date)) 
 
-  ggplot(data = pioggia, aes(   )) +
+  ggplot(data = pioggia_filtrata, aes(   )) +
   geom_line() #oppure geom_bar()
 
 
 ```{r}
+
+# in due passaggi:
+pioggia_filtrata <- pioggia %>%
+  	filter(month(Date) == 1, year(Date) == 2001) %>%
+  	mutate(Date = as.Date(Date)) 
+
+  ggplot(data = pioggia_filtrata, aes(x = Date, y = X1_AVG_D)) +
+  geom_line() #oppure geom_bar()
+
+
+# oppure in un solo passaggio: 
 pioggia %>%
   filter(month(Date) == 1, year(Date) == 2001) %>%
   mutate(Date = as.Date(Date)) %>%
@@ -152,7 +163,7 @@ pioggia_long %>%
 pioggia_2002 <- pioggia %>%
   filter(year(Date) == 2002) %>%
   select(c(Date,X1_AVG_D)) %>%
-  mutate(month = floor_date(Date, "month")) %>%
+  mutate(month = month(Date)) %>%
   group_by(month) %>%
   summarise(sum_monthly = sum(X1_AVG_D, na.rm = TRUE))
 
@@ -170,7 +181,7 @@ pioggia_2002 %>%
 pioggia_mensile <- pioggia %>%
   select(Date, X1_AVG_D : X5_AVG_D) %>%
   filter(year(Date) == 2002) %>%
-  mutate(Mese = floor_date(Date, "month")) %>%
+  mutate(Mese = month(Date)) %>%
   group_by(Mese) %>%
   summarise(
     Stazione_1 = sum(X1_AVG_D, na.rm = TRUE),
@@ -196,7 +207,7 @@ ggplot(pioggia_mensile, aes(x = Mese)) +
 pioggia %>%
   select(Date, X1_AVG_D: X5_AVG_D ) %>%
   filter(year(Date) == 2002) %>%
-  mutate(Mese = floor_date(Date, "month")) %>%
+  mutate(Mese = month(Date)) %>%
   pivot_longer(cols = -c(Date, Mese), names_to = "Stazione", values_to = "Pioggia") %>%
   group_by(Mese, Stazione) %>%
   summarise(Pioggia_cumulata = sum(Pioggia, na.rm = TRUE), .groups = "drop") %>%
@@ -218,7 +229,7 @@ pioggia %>%
   select(Date, X1_AVG_D:X5_AVG_D) %>%
   filter(year(Date) %in% c(2002, 2003, 2004)) %>%
   pivot_longer(cols = X1_AVG_D:X5_AVG_D, names_to = "Stazione", values_to = "Pioggia") %>%
-  mutate(Mese = floor_date(Date, "month")) %>%
+  mutate(Mese = month(Date)) %>%
   group_by(Mese, Stazione) %>%
   summarise(Pioggia_cumulata = sum(Pioggia, na.rm = TRUE), .groups = "drop") %>%
   ggplot(aes(x = Mese, y = Pioggia_cumulata, color = Stazione)) +
