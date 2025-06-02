@@ -45,23 +45,16 @@ Suggerimenti: sum(pioggia$X5_AVG_D .........)
 
 ## Esercizio 6: Crea una nuova variabile totale_mensile che somma le piogge della stazione X1_AVG_D per  mese.
 
-Suggerimento-> usa la sintassi per creare una nuova variabile mese (month): 
+Suggerimento-> usa la sintassi per creare due nuove variabile mese (month) e anno (year): 
 
-“mutate(month = floor_date(Date, "month")) %>%”
-
-successivamente usa group_by
-
+“mutate ( year = year(Date), month = month(Date)) ”
+successivamente, usa group_by
 Scheletro: 
-
 pioggia_monthly <- pioggia %>%
-
-  select(.........) %>%
-  
-  mutate(month = floor_date(Date, "month")) %>%
-  
-  group_by(month) %>%
-  
-  summarise(.............)
+mutate(year = year(Date), month = month(Date)) %>%
+group_by(year, month ) %>%
+summarise(sum_monthly = ………) |> 
+ungroup()
 
 
 ## Esercizio 7: Qual è il giorno con più pioggia totale?
